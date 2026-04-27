@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>mofuel — Backend Developer</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23080b0f'/><rect width='32' height='32' rx='6' fill='%2300ff88' opacity='0.08'/><text x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-family='monospace' font-size='13' font-weight='700' fill='%2300ff88'>%3C/%3E</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&family=Bebas+Neue&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
@@ -471,8 +472,80 @@ footer span { color: var(--g); }
   .stack-grid { grid-template-columns: 1fr 1fr; }
   .arch-block { grid-template-columns: 1fr; }
   .about-grid { grid-template-columns: 1fr; }
+  .cyber-grid { grid-template-columns: 1fr; }
   h1 { font-size: 4rem; }
 }
+
+/* ─── CYBERSEC ─── */
+#cybersec { background: linear-gradient(180deg, transparent, rgba(255,77,109,0.03), transparent); }
+
+.learning-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(255,77,109,0.08);
+  border: 1px solid rgba(255,77,109,0.25);
+  border-radius: 4px; padding: 8px 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--g3); letter-spacing: 0.08em;
+}
+.learning-pill::before { content: '◉  '; }
+
+.cyber-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 1.25rem; margin-bottom: 2rem;
+}
+.cyber-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 1.5rem;
+  transition: border-color 0.3s, transform 0.2s;
+  position: relative; overflow: hidden;
+}
+.cyber-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--g3), transparent);
+  opacity: 0; transition: opacity 0.3s;
+}
+.cyber-card:hover { border-color: rgba(255,77,109,0.2); transform: translateY(-2px); }
+.cyber-card:hover::before { opacity: 1; }
+.cyber-icon { font-size: 1.5rem; margin-bottom: 0.75rem; display: block; }
+.cyber-name { font-weight: 600; font-size: 15px; color: var(--text); margin-bottom: 0.4rem; }
+.cyber-desc { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text2); line-height: 1.8; margin-bottom: 1rem; }
+.cyber-hours {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  color: var(--g3); background: rgba(255,77,109,0.07);
+  border: 1px solid rgba(255,77,109,0.15); padding: 3px 10px; border-radius: 3px;
+}
+
+.roadmap {
+  background: var(--bg2); border: 1px solid var(--border2);
+  border-radius: 10px; padding: 1.75rem;
+}
+.roadmap-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--g3); letter-spacing: 0.1em;
+  margin-bottom: 1.25rem; text-transform: uppercase;
+}
+.roadmap-steps { display: flex; flex-direction: column; position: relative; }
+.roadmap-steps::before {
+  content: ''; position: absolute;
+  left: 10px; top: 8px; bottom: 8px; width: 1px;
+  background: linear-gradient(180deg, var(--g3), var(--purple), var(--g2));
+  opacity: 0.25;
+}
+.rs { display: flex; gap: 1.25rem; align-items: flex-start; padding: 0.75rem 0; }
+.rs-dot {
+  width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 700; position: relative; z-index: 1;
+  font-family: 'JetBrains Mono', monospace;
+}
+.rs-dot.done { background: var(--g3); color: #fff; }
+.rs-dot.now  { background: rgba(255,77,109,0.2); border: 1px solid var(--g3); color: var(--g3); animation: ping 2s ease-in-out infinite; }
+.rs-dot.next { background: var(--bg3); border: 1px solid var(--text3); color: var(--text3); }
+@keyframes ping { 0%,100%{box-shadow:0 0 0 0 rgba(255,77,109,.4)} 50%{box-shadow:0 0 0 6px rgba(255,77,109,0)} }
+.rs-label { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+.rs-sub { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text2); }
+.rs-sub.active { color: var(--g3); }
 </style>
 </head>
 <body>
@@ -489,6 +562,7 @@ footer span { color: var(--g); }
     <ul>
       <li><a href="#stack">stack</a></li>
       <li><a href="#projects">proyectos</a></li>
+      <li><a href="#cybersec">seguridad</a></li>
       <li><a href="#about">about</a></li>
       <li><a href="#contact">contacto</a></li>
     </ul>
@@ -695,19 +769,106 @@ footer span { color: var(--g); }
   </div>
 </section>
 
+<!-- CYBERSEC -->
+<section id="cybersec">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">// 03 — cybersecurity</div>
+      <h2>Seguridad</h2>
+      <span class="accent-line"></span>
+      <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem; margin-bottom:2.5rem;">
+        <p style="font-size:14px; color:var(--text2); max-width:520px; line-height:1.8;">
+          El backend seguro y el pentesting van de la mano. Construir APIs con JWT y Spring Security
+          me llevó a querer entender el otro lado — cómo se atacan los sistemas que uno construye.
+          Estoy en las primeras horas de ese camino, siendo honesto con lo que sé y lo que no.
+        </p>
+        <span class="learning-pill">Explorando · En aprendizaje</span>
+      </div>
+    </div>
+
+    <div class="cyber-grid reveal">
+      <div class="cyber-card">
+        <span class="cyber-icon">🐉</span>
+        <div class="cyber-name">Kali Linux</div>
+        <p class="cyber-desc">Entorno principal para pentesting. Primeros pasos: navegación del sistema, herramientas preinstaladas y filosofía del OS.</p>
+        <span class="cyber-hours">~8 horas · iniciando</span>
+      </div>
+      <div class="cyber-card">
+        <span class="cyber-icon">🔍</span>
+        <div class="cyber-name">Nmap</div>
+        <p class="cyber-desc">Reconocimiento de red y escaneo de puertos. Conceptos básicos de enumeración de servicios y detección de hosts.</p>
+        <span class="cyber-hours">explorando</span>
+      </div>
+      <div class="cyber-card">
+        <span class="cyber-icon">💀</span>
+        <div class="cyber-name">Metasploit</div>
+        <p class="cyber-desc">Framework de explotación. Conocimiento teórico del flujo: info gathering → exploit → post-exploitation.</p>
+        <span class="cyber-hours">teórico · próximo paso</span>
+      </div>
+      <div class="cyber-card" style="background: linear-gradient(135deg, var(--bg2), rgba(0,255,136,0.03)); border-color: rgba(0,255,136,0.12);">
+        <span class="cyber-icon">🔐</span>
+        <div class="cyber-name">Secure Backend Dev</div>
+        <p class="cyber-desc">Lo que ya aplico: JWT stateless, Spring Security, validación de inputs, separación de roles. El puente entre dev y sec.</p>
+        <span class="cyber-hours" style="color:var(--g); background:rgba(0,255,136,0.07); border-color:rgba(0,255,136,0.2);">en producción ✓</span>
+      </div>
+    </div>
+
+    <div class="roadmap reveal">
+      <div class="roadmap-title">// roadmap personal · donde estoy y a dónde voy</div>
+      <div class="roadmap-steps">
+        <div class="rs">
+          <div class="rs-dot done">✓</div>
+          <div>
+            <div class="rs-label">Backend seguro con Java/Spring</div>
+            <div class="rs-sub">JWT, Spring Security, REST APIs — aplicado en proyectos reales</div>
+          </div>
+        </div>
+        <div class="rs">
+          <div class="rs-dot now">▶</div>
+          <div>
+            <div class="rs-label">Kali Linux · fundamentos</div>
+            <div class="rs-sub active">~8 horas · activo ahora mismo</div>
+          </div>
+        </div>
+        <div class="rs">
+          <div class="rs-dot next">3</div>
+          <div>
+            <div class="rs-label">Redes y reconocimiento</div>
+            <div class="rs-sub">Nmap, Wireshark, enumeración de servicios</div>
+          </div>
+        </div>
+        <div class="rs">
+          <div class="rs-dot next">4</div>
+          <div>
+            <div class="rs-label">Web App Pentesting</div>
+            <div class="rs-sub">OWASP Top 10, Burp Suite, SQLI, XSS</div>
+          </div>
+        </div>
+        <div class="rs">
+          <div class="rs-dot next">5</div>
+          <div>
+            <div class="rs-label">CTFs y práctica real</div>
+            <div class="rs-sub">HackTheBox, TryHackMe — metas a futuro</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ABOUT -->
 <section id="about">
   <div class="container">
     <div class="reveal">
-      <div class="section-label">// 03 — about</div>
+      <div class="section-label">// 04 — about</div>
       <h2>Sobre mí</h2>
       <span class="accent-line"></span>
     </div>
     <div class="about-grid reveal">
       <div class="about-text">
-        <p>Soy <strong>mofuel</strong>, backend developer enfocado en construir APIs seguras, escalables y bien documentadas. Mi stack principal es <em>Java con Spring Boot</em>, con experiencia en autenticación JWT y diseño RESTful.</p>
-        <p>He trabajado en equipos donde yo cargo el backend y mis compañeros construyen el frontend — lo que me ha enseñado a diseñar <strong>APIs claras y contratos bien definidos</strong> entre capas.</p>
-        <p>También manejo Python para scripting, Docker para containerización, y tengo conocimientos básicos de frontend para entender el lado del consumidor.</p>
+        <p>Soy <strong>mofuel</strong>, backend developer enfocado en construir APIs seguras y bien diseñadas. Mi stack principal es <em>Java con Spring Boot</em>, con experiencia en autenticación JWT y diseño RESTful.</p>
+        <p>He trabajado en equipos donde yo cargo el backend y mis compañeros construyen el frontend — lo que me enseñó a diseñar <strong>APIs con contratos claros entre capas</strong>.</p>
+        <p>Actualmente explorando <em>cybersecurity y pentesting</em> con Kali Linux — quiero entender cómo se atacan los sistemas que construyo para hacerlos más robustos.</p>
       </div>
       <div class="stats-grid">
         <div class="stat-card">
@@ -735,7 +896,7 @@ footer span { color: var(--g); }
 <section id="contact">
   <div class="container">
     <div class="inner reveal">
-      <div class="section-label">// 04 — contacto</div>
+      <div class="section-label">// 05 — contacto</div>
       <h2>¿Hablamos?</h2>
       <p>Si tienes un proyecto backend, quieres colaborar o tienes una oportunidad — escríbeme. Siempre dispuesto a construir algo bien hecho.</p>
       <div class="contact-btns">
