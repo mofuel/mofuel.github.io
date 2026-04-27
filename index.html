@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mofuel — Backend Developer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&family=Bebas+Neue&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #080b0f;
+  --bg2:      #0e1218;
+  --bg3:      #141920;
+  --border:   rgba(0,255,136,0.08);
+  --border2:  rgba(0,255,136,0.18);
+  --text:     #d8e4f0;
+  --text2:    #627080;
+  --text3:    #3a4858;
+  --g:        #00ff88;
+  --g2:       #00c8ff;
+  --g3:       #ff4d6d;
+  --warn:     #ffaa00;
+  --purple:   #a855f7;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* Custom cursor */
+#cursor {
+  width: 12px; height: 12px;
+  background: var(--g);
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: transform 0.1s, width 0.2s, height 0.2s, background 0.2s;
+  mix-blend-mode: difference;
+}
+#cursor.big { width: 40px; height: 40px; }
+
+/* Scan line effect */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.08) 2px,
+    rgba(0,0,0,0.08) 4px
+  );
+  pointer-events: none;
+  z-index: 9998;
+}
+
+/* Grid bg */
+.grid-bg {
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,255,136,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,255,136,0.025) 1px, transparent 1px);
+  background-size: 50px 50px;
+  z-index: 0;
+  animation: gridDrift 20s linear infinite;
+}
+@keyframes gridDrift {
+  from { background-position: 0 0; }
+  to   { background-position: 50px 50px; }
+}
+
+/* Glow orbs */
+.orb {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(120px);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.12;
+}
+.orb1 { width: 600px; height: 600px; background: var(--g); top: -200px; left: -200px; animation: orbFloat1 12s ease-in-out infinite; }
+.orb2 { width: 400px; height: 400px; background: var(--g2); bottom: 10%; right: -100px; animation: orbFloat2 15s ease-in-out infinite; }
+.orb3 { width: 300px; height: 300px; background: var(--g3); top: 50%; left: 40%; animation: orbFloat3 18s ease-in-out infinite; }
+@keyframes orbFloat1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(60px,40px)} }
+@keyframes orbFloat2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-40px,60px)} }
+@keyframes orbFloat3 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(80px,-50px)} }
+
+/* NAV */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  border-bottom: 1px solid var(--border);
+  background: rgba(8,11,15,0.8);
+  backdrop-filter: blur(20px);
+}
+nav .inner {
+  max-width: 1100px; margin: 0 auto; padding: 0 2.5rem;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 60px;
+}
+.logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 24px;
+  letter-spacing: 0.1em;
+  color: var(--g);
+  text-shadow: 0 0 20px rgba(0,255,136,0.5);
+}
+.logo span { color: var(--text3); }
+nav ul { list-style: none; display: flex; gap: 2.5rem; }
+nav a {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--text2);
+  text-decoration: none; letter-spacing: 0.12em;
+  position: relative; transition: color 0.2s;
+}
+nav a::after {
+  content: ''; position: absolute; left: 0; bottom: -4px;
+  width: 0; height: 1px; background: var(--g);
+  transition: width 0.3s;
+}
+nav a:hover { color: var(--g); }
+nav a:hover::after { width: 100%; }
+
+/* SECTIONS SHARED */
+.container { max-width: 1100px; margin: 0 auto; padding: 0 2.5rem; position: relative; z-index: 1; }
+section { padding: 7rem 0; }
+.section-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--g);
+  letter-spacing: 0.2em; margin-bottom: 0.5rem;
+  text-transform: uppercase; opacity: 0.7;
+}
+h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  letter-spacing: 0.05em; color: var(--text);
+  line-height: 1;
+  margin-bottom: 0.75rem;
+}
+.accent-line {
+  display: block; width: 60px; height: 2px;
+  background: linear-gradient(90deg, var(--g), transparent);
+  margin-bottom: 3.5rem;
+}
+
+/* ─── HERO ─── */
+#hero {
+  min-height: 100vh; display: flex; align-items: center;
+  padding-top: 60px; position: relative; overflow: hidden;
+}
+.hero-inner {
+  display: grid; grid-template-columns: 1fr 480px;
+  gap: 4rem; align-items: center; width: 100%;
+  padding: 5rem 0;
+}
+.badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(0,255,136,0.06);
+  border: 1px solid rgba(0,255,136,0.2);
+  border-radius: 4px; padding: 6px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--g); letter-spacing: 0.1em;
+  margin-bottom: 2rem; text-transform: uppercase;
+}
+.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--g); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(0,255,136,0.4)} 50%{opacity:0.6;box-shadow:0 0 0 6px rgba(0,255,136,0)} }
+
+h1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(4rem, 9vw, 7.5rem);
+  line-height: 0.9; letter-spacing: 0.02em;
+  margin-bottom: 0;
+}
+h1 .line1 { display: block; color: var(--text); }
+h1 .line2 { display: block; color: var(--g); text-shadow: 0 0 40px rgba(0,255,136,0.4); }
+h1 .line3 { display: block; color: var(--text3); font-size: 0.5em; letter-spacing: 0.15em; }
+
+.tagline {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; color: var(--text2); line-height: 2;
+  margin: 2rem 0;
+  border-left: 1px solid var(--g);
+  padding-left: 1.25rem;
+}
+.tagline .highlight { color: var(--g2); }
+
+.hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 28px; border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; letter-spacing: 0.08em;
+  cursor: pointer; text-decoration: none;
+  transition: all 0.25s; border: none; font-weight: 500;
+}
+.btn-g { background: var(--g); color: #000; }
+.btn-g:hover { background: #33ffaa; transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,255,136,0.3); }
+.btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border2); }
+.btn-ghost:hover { border-color: var(--g); color: var(--g); transform: translateY(-2px); }
+
+/* Terminal card */
+.terminal {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 0 60px rgba(0,255,136,0.06), inset 0 1px 0 rgba(255,255,255,0.03);
+  animation: termFloat 6s ease-in-out infinite;
+}
+@keyframes termFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+.t-bar {
+  background: var(--bg3); padding: 12px 16px;
+  display: flex; align-items: center; gap: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.td { width: 10px; height: 10px; border-radius: 50%; }
+.td.r{background:#ff5f56} .td.y{background:#ffbd2e} .td.g{background:#27c93f}
+.t-title { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text3); margin: 0 auto; }
+
+.t-body { padding: 1.5rem 1.75rem; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 2.2; }
+.tl { display: flex; gap: 8px; }
+.tp { color: var(--g); } .tc { color: var(--text); }
+.to { color: var(--text2); padding-left: 1.5rem; display: block; }
+.tk { color: var(--g2); } .tv { color: var(--g3); } .tv2 { color: var(--warn); } .tv3 { color: var(--purple); }
+.tcursor { display: inline-block; width: 8px; height: 15px; background: var(--g); animation: blink 1s steps(1) infinite; vertical-align: middle; margin-left: 2px; }
+@keyframes blink { 0%,49%{opacity:1} 50%,100%{opacity:0} }
+
+/* Typing animation */
+.typewriter { overflow: hidden; white-space: nowrap; border-right: none; }
+.t-body .tl:nth-child(1) { animation: fadeIn 0.3s 0.2s both; }
+.t-body .to:nth-child(2) { animation: fadeIn 0.3s 0.5s both; }
+.t-body .tl:nth-child(3) { animation: fadeIn 0.3s 1s both; }
+.t-body .to:nth-child(4) { animation: fadeIn 0.3s 1.3s both; }
+.t-body .to:nth-child(5) { animation: fadeIn 0.3s 1.5s both; }
+.t-body .to:nth-child(6) { animation: fadeIn 0.3s 1.7s both; }
+.t-body .to:nth-child(7) { animation: fadeIn 0.3s 1.9s both; }
+.t-body .to:nth-child(8) { animation: fadeIn 0.3s 2.1s both; }
+.t-body .to:nth-child(9) { animation: fadeIn 0.3s 2.3s both; }
+.t-body .tl:last-child   { animation: fadeIn 0.3s 2.6s both; }
+@keyframes fadeIn { from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:none} }
+
+/* Scroll indicator */
+.scroll-hint {
+  position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3);
+  letter-spacing: 0.1em; animation: bounce 2s ease-in-out infinite;
+}
+@keyframes bounce { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(6px)} }
+.scroll-hint::after { content: '▼'; font-size: 8px; }
+
+/* ─── STACK ─── */
+#stack { background: linear-gradient(180deg, transparent, rgba(0,255,136,0.02), transparent); }
+
+.stack-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+
+.stack-item {
+  background: var(--bg2); padding: 2rem 1.75rem;
+  display: flex; flex-direction: column; gap: 0.75rem;
+  transition: background 0.3s;
+  position: relative; overflow: hidden;
+}
+.stack-item::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--g), transparent);
+  transform: scaleX(0); transition: transform 0.4s;
+}
+.stack-item:hover { background: var(--bg3); }
+.stack-item:hover::before { transform: scaleX(1); }
+
+.stack-num {
+  font-family: 'Bebas Neue', sans-serif; font-size: 3rem;
+  color: rgba(0,255,136,0.06); position: absolute; right: 1rem; top: 0.5rem;
+  line-height: 1;
+}
+.stack-icon { font-size: 1.75rem; }
+.stack-name { font-weight: 600; font-size: 15px; color: var(--text); }
+.stack-role {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--text2);
+}
+.stack-level {
+  margin-top: auto;
+  height: 2px; background: var(--bg);
+  border-radius: 2px; overflow: hidden;
+}
+.stack-fill { height: 100%; border-radius: 2px; }
+.lv-main { background: var(--g); width: 85%; }
+.lv-high { background: var(--g); width: 80%; }
+.lv-mid  { background: var(--g2); width: 65%; }
+.lv-low  { background: var(--text3); width: 45%; }
+
+/* ─── PROJECTS ─── */
+.proj-intro {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; color: var(--text2); line-height: 1.9;
+  background: rgba(0,255,136,0.04);
+  border: 1px solid var(--border2);
+  border-left: 3px solid var(--g);
+  padding: 1.25rem 1.5rem; border-radius: 0 8px 8px 0;
+  margin-bottom: 3rem;
+}
+.proj-intro strong { color: var(--g); font-weight: 500; }
+
+.projects-list { display: flex; flex-direction: column; gap: 2px; }
+
+.proj-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 12px; overflow: hidden;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.proj-card:hover {
+  border-color: rgba(0,255,136,0.25);
+  box-shadow: 0 0 40px rgba(0,255,136,0.04);
+}
+
+.proj-header {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; gap: 1rem;
+  padding: 2rem 2rem 1.5rem;
+}
+.proj-meta { flex: 1; }
+
+.proj-badges { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
+.pbadge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: 0.12em;
+  padding: 3px 10px; border-radius: 3px;
+  text-transform: uppercase; font-weight: 500;
+}
+.pb-real { background: rgba(0,255,136,0.12); color: var(--g); border: 1px solid rgba(0,255,136,0.25); }
+.pb-fs   { background: rgba(0,200,255,0.08); color: var(--g2); border: 1px solid rgba(0,200,255,0.2); }
+.pb-team { background: rgba(168,85,247,0.08); color: var(--purple); border: 1px solid rgba(168,85,247,0.2); }
+
+.proj-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.2rem; letter-spacing: 0.05em;
+  color: var(--text); margin-bottom: 0.5rem;
+}
+.proj-desc { font-size: 14px; color: var(--text2); line-height: 1.75; max-width: 580px; }
+
+.proj-link-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  color: var(--text2); text-decoration: none;
+  padding: 8px 16px; border: 1px solid var(--border2);
+  border-radius: 6px; white-space: nowrap;
+  transition: all 0.2s; flex-shrink: 0;
+}
+.proj-link-btn:hover { color: var(--g); border-color: rgba(0,255,136,0.4); }
+
+/* Architecture block */
+.arch-block {
+  border-top: 1px solid var(--border);
+  padding: 1.5rem 2rem 2rem;
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+.arch-side {
+  background: var(--bg3); border-radius: 8px; padding: 1.25rem;
+  border: 1px solid var(--border);
+  position: relative;
+}
+.arch-side.mine { border-color: rgba(0,255,136,0.2); }
+.arch-side.theirs { border-color: var(--border); }
+
+.arch-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: 0.15em;
+  text-transform: uppercase; margin-bottom: 1rem;
+}
+.arch-label.mine { color: var(--g); }
+.arch-label.theirs { color: var(--text3); }
+
+.arch-badge {
+  position: absolute; top: 1rem; right: 1rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px; padding: 2px 8px;
+  border-radius: 3px;
+}
+.ab-you { background: rgba(0,255,136,0.15); color: var(--g); }
+.ab-team { background: rgba(255,255,255,0.05); color: var(--text3); }
+
+.arch-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 0.75rem; }
+.arch-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.atag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; padding: 3px 10px; border-radius: 3px;
+}
+.atag-g { background: rgba(0,255,136,0.08); color: var(--g); }
+.atag-b { background: rgba(0,200,255,0.07); color: var(--g2); }
+.atag-r { background: rgba(255,77,109,0.07); color: var(--g3); }
+.atag-w { background: rgba(255,170,0,0.07); color: var(--warn); }
+.atag-d { background: rgba(255,255,255,0.04); color: var(--text2); }
+
+.proj-sep { height: 2rem; }
+
+/* ─── ABOUT ─── */
+#about { background: linear-gradient(180deg, transparent, rgba(0,200,255,0.02), transparent); }
+
+.about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
+.about-text { font-size: 15px; color: var(--text2); line-height: 1.9; }
+.about-text p { margin-bottom: 1.25rem; }
+.about-text strong { color: var(--text); font-weight: 600; }
+.about-text em { color: var(--g); font-style: normal; }
+
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.stat-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 1.5rem;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.stat-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+.stat-num {
+  font-family: 'Bebas Neue', sans-serif; font-size: 3rem;
+  color: var(--g); line-height: 1; margin-bottom: 0.25rem;
+  text-shadow: 0 0 20px rgba(0,255,136,0.3);
+}
+.stat-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text2); }
+
+/* ─── CONTACT ─── */
+#contact .inner {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 16px; padding: 4rem;
+  text-align: center;
+  position: relative; overflow: hidden;
+}
+#contact .inner::before {
+  content: '';
+  position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+  background: radial-gradient(ellipse at center, rgba(0,255,136,0.04) 0%, transparent 60%);
+  pointer-events: none;
+}
+#contact h2 { margin-bottom: 1rem; }
+#contact p { color: var(--text2); font-size: 15px; max-width: 480px; margin: 0 auto 2.5rem; line-height: 1.8; }
+.contact-btns { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+
+/* Footer */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 2.5rem 0; text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--text3);
+  position: relative; z-index: 1;
+}
+footer span { color: var(--g); }
+
+/* Reveal on scroll */
+.reveal {
+  opacity: 0; transform: translateY(30px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.visible { opacity: 1; transform: none; }
+
+@media (max-width: 768px) {
+  .hero-inner { grid-template-columns: 1fr; }
+  .stack-grid { grid-template-columns: 1fr 1fr; }
+  .arch-block { grid-template-columns: 1fr; }
+  .about-grid { grid-template-columns: 1fr; }
+  h1 { font-size: 4rem; }
+}
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div class="grid-bg"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+
+<nav>
+  <div class="inner">
+    <div class="logo"><span>~/</span>MOFUEL</div>
+    <ul>
+      <li><a href="#stack">stack</a></li>
+      <li><a href="#projects">proyectos</a></li>
+      <li><a href="#about">about</a></li>
+      <li><a href="#contact">contacto</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="container">
+    <div class="hero-inner">
+      <div>
+        <div class="badge"><div class="dot"></div>disponible · open to work</div>
+        <h1>
+          <span class="line1">BACKEND</span>
+          <span class="line2">DEVELOPER</span>
+          <span class="line3">// mofuel</span>
+        </h1>
+        <p class="tagline">
+          Building <span class="highlight">secure backends</span>, one endpoint at a time<br>
+          Java · Spring Boot · JWT · REST API<br>
+          Arquitectura desacoplada · Trabajo en equipo
+        </p>
+        <div class="hero-btns">
+          <a href="#projects" class="btn btn-g">Ver proyectos →</a>
+          <a href="https://github.com/mofuel" class="btn btn-ghost">GitHub</a>
+        </div>
+      </div>
+
+      <div class="terminal">
+        <div class="t-bar">
+          <div class="td r"></div><div class="td y"></div><div class="td g"></div>
+          <div class="t-title">mofuel@dev — bash</div>
+        </div>
+        <div class="t-body">
+          <div class="tl"><span class="tp">$</span><span class="tc"> cat profile.json</span></div>
+          <span class="to"><span class="tk">"name"</span>: <span class="tv">"mofuel"</span>,</span>
+          <div class="tl"><span class="tp">$</span><span class="tc"> ./run-stack.sh</span></div>
+          <span class="to"><span class="tk">backend</span>: <span class="tv">"Java + Spring Boot"</span></span>
+          <span class="to"><span class="tk">auth</span>: <span class="tv">"JWT stateless"</span></span>
+          <span class="to"><span class="tk">api</span>: <span class="tv">"RESTful"</span></span>
+          <span class="to"><span class="tk">arch</span>: <span class="tv2">"decoupled"</span></span>
+          <span class="to"><span class="tk">team</span>: <span class="tv3">true</span></span>
+          <span class="to"><span class="tk">open_to_work</span>: <span class="tv3">true</span></span>
+          <div class="tl"><span class="tp">$</span><span class="tcursor"></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-hint">scroll</div>
+</section>
+
+<!-- STACK -->
+<section id="stack">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">// 01 — tech stack</div>
+      <h2>Herramientas</h2>
+      <span class="accent-line"></span>
+    </div>
+    <div class="stack-grid reveal">
+      <div class="stack-item">
+        <div class="stack-num">01</div>
+        <div class="stack-icon">☕</div>
+        <div class="stack-name">Java</div>
+        <div class="stack-role">Lenguaje principal</div>
+        <div class="stack-level"><div class="stack-fill lv-main"></div></div>
+      </div>
+      <div class="stack-item">
+        <div class="stack-num">02</div>
+        <div class="stack-icon">🍃</div>
+        <div class="stack-name">Spring Boot</div>
+        <div class="stack-role">Framework REST & seguridad</div>
+        <div class="stack-level"><div class="stack-fill lv-high"></div></div>
+      </div>
+      <div class="stack-item">
+        <div class="stack-num">03</div>
+        <div class="stack-icon">🔐</div>
+        <div class="stack-name">JWT</div>
+        <div class="stack-role">Auth stateless</div>
+        <div class="stack-level"><div class="stack-fill lv-high"></div></div>
+      </div>
+      <div class="stack-item">
+        <div class="stack-num">04</div>
+        <div class="stack-icon">🐍</div>
+        <div class="stack-name">Python</div>
+        <div class="stack-role">Scripting & data</div>
+        <div class="stack-level"><div class="stack-fill lv-mid"></div></div>
+      </div>
+      <div class="stack-item">
+        <div class="stack-num">05</div>
+        <div class="stack-icon">🐳</div>
+        <div class="stack-name">Docker</div>
+        <div class="stack-role">Containerización</div>
+        <div class="stack-level"><div class="stack-fill lv-mid"></div></div>
+      </div>
+      <div class="stack-item">
+        <div class="stack-num">06</div>
+        <div class="stack-icon">🌐</div>
+        <div class="stack-name">HTML / CSS / JS</div>
+        <div class="stack-role">Frontend básico</div>
+        <div class="stack-level"><div class="stack-fill lv-low"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">// 02 — proyectos reales</div>
+      <h2>Lo que construí</h2>
+      <span class="accent-line"></span>
+      <p class="proj-intro">
+        Ambos proyectos son <strong>fullstack con arquitectura desacoplada</strong>: trabajé como
+        <strong>Backend Developer en equipo</strong>, responsable del backend completo
+        (APIs REST, autenticación JWT, lógica de negocio), mientras que mis compañeros desarrollaron
+        el frontend que consume la API. Cada servicio corre de forma independiente.
+      </p>
+    </div>
+
+    <div class="projects-list">
+
+      <!-- MEDITRACK -->
+      <div class="proj-card reveal">
+        <div class="proj-header">
+          <div class="proj-meta">
+            <div class="proj-badges">
+              <span class="pbadge pb-real">★ Proyecto real</span>
+              <span class="pbadge pb-fs">Fullstack</span>
+              <span class="pbadge pb-team">Trabajo en equipo</span>
+            </div>
+            <div class="proj-name">MediTrack</div>
+            <p class="proj-desc">Sistema de gestión médica digital. Backend seguro con autenticación JWT, endpoints para gestión de pacientes, historiales clínicos y citas médicas. API REST consumida por el frontend del equipo.</p>
+          </div>
+          <a href="https://github.com/mofuel/MediTrack-Back" class="proj-link-btn">→ Backend repo</a>
+        </div>
+        <div class="arch-block">
+          <div class="arch-side mine">
+            <span class="arch-badge ab-you">Backend Dev</span>
+            <div class="arch-label mine">// mi rol · backend developer</div>
+            <div class="arch-title">API REST + Auth</div>
+            <div class="arch-tags">
+              <span class="atag atag-g">Java</span>
+              <span class="atag atag-g">Spring Boot</span>
+              <span class="atag atag-b">JWT</span>
+              <span class="atag atag-b">REST API</span>
+              <span class="atag atag-r">Spring Security</span>
+            </div>
+          </div>
+          <div class="arch-side theirs">
+            <span class="arch-badge ab-team">Compañeros</span>
+            <div class="arch-label theirs">// frontend · equipo</div>
+            <div class="arch-title">Interfaz de usuario</div>
+            <div class="arch-tags">
+              <span class="atag atag-d">EduTrackFront</span>
+              <span class="atag atag-d">Consume la API</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="proj-sep"></div>
+
+      <!-- EDUTRACK -->
+      <div class="proj-card reveal">
+        <div class="proj-header">
+          <div class="proj-meta">
+            <div class="proj-badges">
+              <span class="pbadge pb-real">★ Proyecto real</span>
+              <span class="pbadge pb-fs">Fullstack</span>
+              <span class="pbadge pb-team">Trabajo en equipo</span>
+            </div>
+            <div class="proj-name">EduTrack</div>
+            <p class="proj-desc">Plataforma educativa para seguimiento de estudiantes y cursos. Desarrollé el backend con gestión de usuarios, roles, progreso académico y endpoints documentados para integración con el frontend.</p>
+          </div>
+          <a href="https://github.com/mofuel/EduTrack" class="proj-link-btn">→ Backend repo</a>
+        </div>
+        <div class="arch-block">
+          <div class="arch-side mine">
+            <span class="arch-badge ab-you">Backend Dev</span>
+            <div class="arch-label mine">// mi rol · backend developer</div>
+            <div class="arch-title">API REST + Roles</div>
+            <div class="arch-tags">
+              <span class="atag atag-g">Java</span>
+              <span class="atag atag-g">Spring Boot</span>
+              <span class="atag atag-b">JWT</span>
+              <span class="atag atag-w">Gestión de roles</span>
+              <span class="atag atag-b">REST API</span>
+            </div>
+          </div>
+          <div class="arch-side theirs">
+            <span class="arch-badge ab-team">Compañeros</span>
+            <div class="arch-label theirs">// frontend · equipo</div>
+            <div class="arch-title">Panel educativo</div>
+            <div class="arch-tags">
+              <span class="atag atag-d">EduTrackFront</span>
+              <span class="atag atag-d">Consume la API</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">// 03 — about</div>
+      <h2>Sobre mí</h2>
+      <span class="accent-line"></span>
+    </div>
+    <div class="about-grid reveal">
+      <div class="about-text">
+        <p>Soy <strong>mofuel</strong>, backend developer enfocado en construir APIs seguras, escalables y bien documentadas. Mi stack principal es <em>Java con Spring Boot</em>, con experiencia en autenticación JWT y diseño RESTful.</p>
+        <p>He trabajado en equipos donde yo cargo el backend y mis compañeros construyen el frontend — lo que me ha enseñado a diseñar <strong>APIs claras y contratos bien definidos</strong> entre capas.</p>
+        <p>También manejo Python para scripting, Docker para containerización, y tengo conocimientos básicos de frontend para entender el lado del consumidor.</p>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-num">2</div>
+          <div class="stat-label">proyectos reales fullstack</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">6+</div>
+          <div class="stat-label">repos en GitHub</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">JWT</div>
+          <div class="stat-label">auth en todos los proyectos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">100%</div>
+          <div class="stat-label">arquitectura desacoplada</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="container">
+    <div class="inner reveal">
+      <div class="section-label">// 04 — contacto</div>
+      <h2>¿Hablamos?</h2>
+      <p>Si tienes un proyecto backend, quieres colaborar o tienes una oportunidad — escríbeme. Siempre dispuesto a construir algo bien hecho.</p>
+      <div class="contact-btns">
+        <a href="https://github.com/mofuel" class="btn btn-g">GitHub →</a>
+        <a href="mailto:tu@email.com" class="btn btn-ghost">Email</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>mofuel · <span>Building secure backends, one endpoint at a time</span></p>
+  </div>
+</footer>
+
+<script>
+// Custom cursor
+const cursor = document.getElementById('cursor');
+document.addEventListener('mousemove', e => {
+  cursor.style.left = e.clientX + 'px';
+  cursor.style.top = e.clientY + 'px';
+});
+document.querySelectorAll('a, button, .proj-card, .stack-item').forEach(el => {
+  el.addEventListener('mouseenter', () => cursor.classList.add('big'));
+  el.addEventListener('mouseleave', () => cursor.classList.remove('big'));
+});
+
+// Scroll reveal
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('visible'); }
+  });
+}, { threshold: 0.12 });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// Stagger children
+document.querySelectorAll('.stack-grid .stack-item').forEach((el, i) => {
+  el.style.transitionDelay = (i * 0.08) + 's';
+});
+</script>
+
+</body>
+</html>
